@@ -1,26 +1,21 @@
 package kr.ac.kumoh.railroApplication.fragments;
 
 
-import android.app.Dialog;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.Toast;
 
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
-import com.wdullaer.materialdatetimepicker.time.RadialPickerLayout;
-import com.wdullaer.materialdatetimepicker.time.TimePickerDialog;
 
 import java.util.Calendar;
-import java.util.Date;
-import java.util.zip.Inflater;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -31,13 +26,17 @@ import kr.ac.kumoh.railroApplication.R;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends BaseFragment implements DatePickerDialog.OnDateSetListener{
+public class HomeFragment extends BaseFragment implements DatePickerDialog.OnDateSetListener {
+
 
     @InjectView(R.id.collapsing_toolbar)
     CollapsingToolbarLayout mCollapsingToolbar;
 
     @InjectView(R.id.coordinator_layout)
     CoordinatorLayout mCoordinatorLayout;
+
+    @InjectView(R.id.share_menu_item)
+    FloatingActionButton mFab;
 
 
     /**
@@ -47,9 +46,11 @@ public class HomeFragment extends BaseFragment implements DatePickerDialog.OnDat
      * @return A new instance of fragment ParallaxFragment.
      */
     Button mButton;
+
     int year_x, month_x, day_x;
     static final int DIALOG_ID = 0;
-
+    static final int REQUEST_CODE = 100;
+    final String item[] = {"5일", "7일"};
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -71,7 +72,15 @@ public class HomeFragment extends BaseFragment implements DatePickerDialog.OnDat
             @Override
             public void onClick(View v) {
 
-               // new DatePickerDialog(getActivity(), dpickerListener, year_x, month_x, day_x).show();
+                // new DatePickerDialog(getActivity(), dpickerListener, year_x, month_x, day_x).show();
+
+            }
+        });
+
+
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 Calendar now = Calendar.getInstance();
                 DatePickerDialog dpd = DatePickerDialog.newInstance(
                         HomeFragment.this,
@@ -83,8 +92,21 @@ public class HomeFragment extends BaseFragment implements DatePickerDialog.OnDat
             }
         });
 
-    };
 
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_CODE:
+                // String DatePicker = data.getStringExtra("date");
+                break;
+            default:
+                break;
+        }
+    }
 
     @Override
     protected int getToolbarId() {
@@ -109,10 +131,39 @@ public class HomeFragment extends BaseFragment implements DatePickerDialog.OnDat
 
     @Override
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-        String date = year+"/"+(monthOfYear+1)+"/"+dayOfMonth+"를 선택하셨습니다";
+        String date = year + "/" + (monthOfYear + 1) + "/" + dayOfMonth;
+        String dateInfo = date + "를 선택하셨습니다";
         // dateTextView.setText(date);
-        Toast.makeText(getActivity(), date, Toast.LENGTH_SHORT).show();
-        //TODO: DB에 날짜 저장해야함
-        mButton.setText((monthOfYear+1)+"/"+dayOfMonth);
+        Toast.makeText(getActivity(), dateInfo, Toast.LENGTH_SHORT).show();
+        mButton.setText((monthOfYear + 1) + "/" + dayOfMonth);
+
+        onTripDaySet(date);
+    }
+
+    public void onTripDaySet(final String date) {
+        AlertDialog.Builder ab = new AlertDialog.Builder(getActivity());
+        ab.setTitle(date + "\n" + "내일로 여행을 몇 일간 떠나나요?");
+        ab.setSingleChoiceItems(item, 0, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichbutton) {
+                switch (whichbutton) {
+                    case 0:
+                        Toast.makeText(getActivity(), "(" + date + ") 5일 선택하셨습니다.", Toast.LENGTH_SHORT).show();
+                        break;
+                    case 1:
+                        Toast.makeText(getActivity(), "(" + date + ") 7일 선택하셨습니다.", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+                //TODO: DB에 날짜 저장해야함
+            }
+        }).setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichbutton) {
+
+            }
+        }).setNegativeButton("취소", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichbutton) {
+
+            }
+        });
+        ab.show();
     }
 }

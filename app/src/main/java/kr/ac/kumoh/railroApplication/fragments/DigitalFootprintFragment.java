@@ -35,7 +35,7 @@ public class DigitalFootprintFragment extends BaseFragment{
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        setList();
+       // setList();
         moveFab();
     }
 
